@@ -166,13 +166,19 @@ describe("Monkey Contract, testing", () => {
       accountToAddressArray[accIndex] = accounts[accIndex].address;        
     }       
 
+    //xxxxx deploying the BananaToken smart contract and ..
+    _bananaTokenInstance = await ethers.getContractFactory('BananaToken');
+    bananaContract = await _bananaTokenInstance.deploy();  
+
     // Deploy MonkeyContract to hardhat testnet
     _contractInstance = await ethers.getContractFactory('MonkeyContract');
-    monkeyContract = await _contractInstance.deploy(accountToAddressArray);  
+    monkeyContract = await _contractInstance.deploy(bananaContract.address, accountToAddressArray);  
     
     // deploying the MonkeyMarketplace smart contract and sending it the address of the MonkeyContract for the marketplace constructor
     _marketContractInstance = await ethers.getContractFactory('MonkeyMarketplace');
     monkeyMarketContract = await _marketContractInstance.deploy(monkeyContract.address);   
+
+    
     
     // accounts[0] / onlyOwner connects market to main contract, tokens now cannot be transferred in main while on sale in market
     await monkeyContract.connectMarket(monkeyMarketContract.address, true);

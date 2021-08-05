@@ -214,7 +214,6 @@ contract MonkeyContract is ERC721Enumerable, Ownable, ReentrancyGuard, Pausable 
         uint256 newMonkey = _createMonkey(99, 99, 99, _genes, _owner);
         return newMonkey;
     }
-
     
     // used for creating monkeys (returns tokenId, could be used)
     function _createMonkey(
@@ -245,9 +244,7 @@ contract MonkeyContract is ERC721Enumerable, Ownable, ReentrancyGuard, Pausable 
 
         // This is the Token ID of the new NFT
         return newMonkeyId;
-    }    
-
-    
+    } 
 
     /// * @dev Assign ownership of a specific NFT CryptoMonkey to an address.
     /// * @dev This poses no restriction on _msgSender()
