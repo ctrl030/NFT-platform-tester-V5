@@ -205,7 +205,7 @@ contract MonkeyContract is ERC721Enumerable, Ownable, ReentrancyGuard, Pausable 
         uint256 _genes,
         address _owner
     ) public returns (uint256) {
-        require(bananaToken.balanceOf(_owner) >= _creationFee, "not enough balance for creation fee");
+        require(bananaToken.balanceOf(_owner) >= _creationFee, "Not enough Banana Token. Use the free faucet.");
         uint256 _oldBalanceOf = bananaToken.balanceOf(address(this));
         // sent creation Fee to contract
         bananaToken.transferFrom(msg.sender, address(this), _creationFee);

@@ -570,15 +570,19 @@ describe("Monkey Contract, testing", () => {
 
   });
 
-  it('Test 12: "Real world use" - Buying / selling, interwoven with breeding, creating and deleting offers', async () => {
+
+
+
+  
+  it('Test 12: "Real world use" - Buying / selling, interwoven with breeding, creating and deleting offers', async () => {    
 
     // accounts[1] owns these NFTs at this point (all 4 are up for sale)
     const tokensOwnedByAcc1 = [2, 3, 13, 15];
     await expectNFTArray(accounts[1].address, tokensOwnedByAcc1);
 
     // accounts[1] should have 10000 ETH (Hardhat environment starting balance) at this point
-    const balanceBeforeT15Acc1 = await getETHbalance(accounts[1].address); 
-    expect(balanceBeforeT15Acc1).to.equal(10000);
+    const balanceBeforeT12Acc1 = await getETHbalance(accounts[1].address); 
+    expect(balanceBeforeT12Acc1).to.equal(10000);
     assertionCounter++;
 
     // accounts[3] owns no NFTs at this point
@@ -666,8 +670,26 @@ describe("Monkey Contract, testing", () => {
     await monkeyMarketContract.connect( accounts[2] ).buyMonkey( 26, {value: ethers.utils.parseEther("0.26")} ); 
     await monkeyMarketContract.connect( accounts[2] ).buyMonkey( 6, {value: ethers.utils.parseEther("6")} );  
 
-    // creating demo NFT    
-    await monkeyContract.connect(accounts[6]).createDemoMonkey(1111222233334444, accounts[6].address);    
+    // REVERT: trying to mint a Monkey NFT without enough Banana Token
+    await expect(monkeyContract.connect(accounts[6]).createDemoMonkey(1111222233334444, accounts[6].address)).to.be.revertedWith(
+      "Not enough Banana Token. Use the free faucet."
+    );     
+
+    // getting Banana Token from faucet, emits Transfer event
+    await expect(bananaContract.connect(accounts[6]).claimToken())
+    .to.emit(bananaContract, 'Transfer')
+    .withArgs('0x0000000000000000000000000000000000000000', accounts[6].address, 1000);
+
+    // REVERT: trying to mint a Monkey NFT without giving the contract allowance for Banana Token
+    await expect(monkeyContract.connect(accounts[6]).createDemoMonkey(1111222233334444, accounts[6].address)).to.be.revertedWith(
+      "ERC20: transfer amount exceeds allowance"
+    );    
+
+    // allow contract to transfer tokens
+    await bananaContract.connect(accounts[6]).approve(monkeyContract.address, 1000);
+
+    // creating demo NFT   
+    await monkeyContract.connect(accounts[6]).createDemoMonkey(1111222233334444, accounts[6].address);
     const test12Acc6ExpectedArr = [32];
     await expectNFTArray(accounts[6].address, test12Acc6ExpectedArr);
     const monkey32 = await monkeyContract.allMonkeysArray(32);    
@@ -753,7 +775,7 @@ describe("Monkey Contract, testing", () => {
     );
 
     // REVERT: creating demo NFT is reverted in main contract while it is paused    
-    await expect( monkeyContract.connect(accounts[3]).createDemoMonkey(1111222233334444, accounts[3].address) ).to.be.revertedWith(
+    await expect( monkeyContract.connect(accounts[6]).createDemoMonkey(1111222233334444, accounts[6].address) ).to.be.revertedWith(
       "Pausable: paused"
     );       
 
